@@ -152,6 +152,23 @@
     
     CGPoint point = [gr locationInView:self];
     self.selectedLine = [self lineAtPoint:point];
+    
+    if (self.selectedLine) {
+        //Make ourselves the target of menu item action message
+        [self becomeFirstResponder];
+        //Grab the Menu Controller
+        UIMenuController *menu = [UIMenuController sharedMenuController];
+        //Create a new "Delete" UIMenuItem
+        UIMenuItem *deleteItem = [[UIMenuItem alloc]initWithTitle:@"Delete" action:@selector(deleteLine:)];
+        menu.menuItems = @[deleteItem];
+        //Tell the menu where it should come from and show it
+        [menu setTargetRect:CGRectMake(point.x, point.y, 2, 2) inView:self];
+        [menu setMenuVisible:YES animated:YES];
+    }
+    else {
+        //Hide Menu if no line is selected
+        [[UIMenuController sharedMenuController]setMenuVisible:NO animated:YES];
+    }
     [self setNeedsDisplay];
     
 }
@@ -179,4 +196,19 @@
     //If nothing is close enough to the tapped point, then we did not select line
     return nil;
 }
+
+//If you have a custom view class that needs to become the first responder, you must override following method
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+-(void)deleteLine: (id)sender {
+    
+    //Remove the selected libe from the list of finishedline
+    
+    [self.finishedLines removeObject:self.selectedLine];
+    //Redraw Everything
+    [self setNeedsDisplay];
+}
+
 @end
