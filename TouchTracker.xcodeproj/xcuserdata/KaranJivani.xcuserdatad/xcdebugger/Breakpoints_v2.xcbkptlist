@@ -10,13 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TouchTracker/KRNDrawView.m"
-            timestampString = "490816436.929962"
+            timestampString = "490830456.257562"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "297"
-            endingLineNumber = "297"
-            landmarkName = "-gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:"
-            landmarkType = "5">
+            startingLineNumber = "317"
+            endingLineNumber = "317">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -26,11 +24,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TouchTracker/KRNDrawView.m"
-            timestampString = "490816441.244013"
+            timestampString = "490827625.085085"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "266"
-            endingLineNumber = "266"
+            startingLineNumber = "273"
+            endingLineNumber = "273"
             landmarkName = "-moveLine:"
             landmarkType = "5">
          </BreakpointContent>

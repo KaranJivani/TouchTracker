@@ -22,6 +22,11 @@
     KRNDrawViewController *dvc = [[KRNDrawViewController alloc]init];
     self.window.rootViewController = dvc;
     
+#ifdef VIEW_DEBUG
+    
+    NSLog(@"This log only compiles only in debug mode not in release mode");
+#endif
+    
     return YES;
 }
 
