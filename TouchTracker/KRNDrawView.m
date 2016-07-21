@@ -9,7 +9,7 @@
 #import "KRNDrawView.h"
 #import "KRNLine.h"
 
-@interface KRNDrawView ()
+@interface KRNDrawView ()<UIGestureRecognizerDelegate>
 
 @property(nonatomic,strong) NSMutableDictionary *linesInProgress;
 @property(nonatomic,strong) NSMutableArray *finishedLines;
@@ -17,11 +17,13 @@
 @property(nonatomic,weak) KRNLine *selectedLine;
 
 @property(nonatomic) UITapGestureRecognizer *doubleTapRecognizer;
+@property(nonatomic) UIPanGestureRecognizer *moveRecognizer;
 
 @end
 
 @implementation KRNDrawView
 
+#pragma mark init Methods
 -(instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -33,21 +35,25 @@
         [self doubleTapGesture];
         [self singleTapGesture];
         [self longPressGesture];
+        [self panGesture];
     }
     return self;
 }
+
+#pragma mark Draw lines methods
 
 -(void)strokeLines: (KRNLine *)line {
     
     UIBezierPath *bp = [UIBezierPath bezierPath];
     bp.lineWidth = 10;
     bp.lineCapStyle = kCGLineCapRound;
-
+    
     [bp moveToPoint:line.begin];
     [bp addLineToPoint:line.end];
     [bp stroke];
 }
 
+#pragma mark UIView method override
 -(void)drawRect:(CGRect)rect {
     
     //Draw finished line in Black
@@ -82,11 +88,11 @@
         
         NSValue *key = [NSValue valueWithNonretainedObject:t];
         [self.linesInProgress setObject:line forKey:key];
-    
+        
     }
     [self setNeedsDisplay];
     NSLog(@"touchesBegan");
-
+    
 }
 
 -(void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -98,10 +104,10 @@
     }
     [self setNeedsDisplay];
     NSLog(@"touchesMoved");
-
+    
 }
 
--(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {    
+-(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     for (UITouch *t in touches) {
         NSValue *key = [NSValue valueWithNonretainedObject:t];
         
@@ -111,7 +117,7 @@
     }
     [self setNeedsDisplay];
     NSLog(@"touchesEnded");
-
+    
 }
 
 -(void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
@@ -123,6 +129,7 @@
     [self setNeedsDisplay];
 }
 
+#pragma mark DoubleTap gesture initialization and action methods
 -(void)doubleTapGesture {
     
     self.doubleTapRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(doubleTap:)];
@@ -138,6 +145,8 @@
     [self.finishedLines removeAllObjects];
     [self setNeedsDisplay];
 }
+
+#pragma mark SingleTap gesture initialization and action methods
 
 -(void)singleTapGesture {
     
@@ -212,8 +221,11 @@
     [self setNeedsDisplay];
 }
 
+#pragma mark LongPress gesture initialization and action methods
+
+
 -(void)longPressGesture{
- 
+    
     UILongPressGestureRecognizer *pressRecognizer = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPress:)];
     [self addGestureRecognizer:pressRecognizer];
 }
@@ -230,11 +242,63 @@
             [self.linesInProgress removeAllObjects];
         }
     }
-    //when the longpress ended, you will deselect the line 
+    //when the longpress ended, you will deselect the line
     else if (gr.state == UIGestureRecognizerStateEnded) {
         self.selectedLine = nil;
     }
     [self setNeedsDisplay];
+}
+
+#pragma mark Pan gesture initialization and action methods
+
+
+-(void)panGesture {
+    
+    self.moveRecognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(moveLine:)];
+    self.moveRecognizer.delegate = self;
+    self.moveRecognizer.cancelsTouchesInView = NO;
+    
+    [self addGestureRecognizer:self.moveRecognizer];
+}
+
+-(void)moveLine: (UIPanGestureRecognizer *)gr {
+    //if we have not selected a line we do not do anything
+    if (!self.selectedLine) {
+        return;
+    }
+    
+    //when the pan recognizer changes its position
+    if (gr.state == UIGestureRecognizerStateChanged) {
+        
+        //How far the pan moved?
+        CGPoint translation = [gr translationInView:self];
+        
+        //add translation to the current beginning and end points of the line
+        CGPoint begin = self.selectedLine.begin;
+        CGPoint end = self.selectedLine.end;
+        
+        begin.x += translation.x;
+        begin.y += translation.y;
+        end.x += translation.x;
+        end.y += translation.y;
+        
+        //set the new beggining and end points of the line
+        self.selectedLine.begin = begin;
+        self.selectedLine.end = end;
+        
+        //redraw the screen
+        [self setNeedsDisplay];
+        [gr setTranslation:CGPointZero inView:self];
+    }
+}
+#pragma mark UIGesterRecognizerDelegate method
+
+//If this method returns YES, The recognizer will share its touches with other gesture recognizers
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    if (gestureRecognizer == self.moveRecognizer) {
+        return YES;
+    }
+    return NO;
 }
 
 @end
