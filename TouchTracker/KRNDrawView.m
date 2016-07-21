@@ -32,6 +32,7 @@
         
         [self doubleTapGesture];
         [self singleTapGesture];
+        [self longPressGesture];
     }
     return self;
 }
@@ -208,6 +209,31 @@
     
     [self.finishedLines removeObject:self.selectedLine];
     //Redraw Everything
+    [self setNeedsDisplay];
+}
+
+-(void)longPressGesture{
+ 
+    UILongPressGestureRecognizer *pressRecognizer = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPress:)];
+    [self addGestureRecognizer:pressRecognizer];
+}
+
+-(void) longPress: (UIGestureRecognizer *)gr {
+    
+    //When view receive this method and long press has begun, you will select the closest line to where the gesture occured
+    if (gr.state == UIGestureRecognizerStateBegan) {
+        
+        CGPoint point = [gr locationInView:self];
+        self.selectedLine = [self lineAtPoint:point];
+        
+        if (self.selectedLine) {
+            [self.linesInProgress removeAllObjects];
+        }
+    }
+    //when the longpress ended, you will deselect the line 
+    else if (gr.state == UIGestureRecognizerStateEnded) {
+        self.selectedLine = nil;
+    }
     [self setNeedsDisplay];
 }
 
